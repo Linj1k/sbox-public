@@ -165,6 +165,29 @@ public partial class PackagePopup : PopupWidget
 				BuildMetaRow( w.Layout, "Remote", $"{remote.VersionId} ({remote.Created.LocalDateTime.ToShortDateString()})" );
 
 			BuildMetaRow( w.Layout, "Local", local is null ? "None" : $"{local.VersionId} ({local.Created.LocalDateTime.ToShortDateString()})" );
+
+			var size = 0L;
+			if ( remote is not null && remote.TotalSize > 0 )
+				size = remote.TotalSize;
+			else if ( local is not null && local.TotalSize > 0 )
+				size = local.TotalSize;
+			else if ( Package.FileSize > 0 )
+				size = (long)Package.FileSize;
+			else
+			{
+				// Fallback to fetching the package size if it's not available
+				Sandbox.Package.FetchAsync( Package.FullIdent, false ).ContinueWith( async (task) =>
+				{
+					var pkg = await task;
+					if ( pkg is null )
+						return;
+
+					Package = pkg;
+					RebuildMeta();
+				}, TaskScheduler.FromCurrentSynchronizationContext() );
+			}
+
+			BuildMetaRow( w.Layout, "Size:", size > 0 ? size.SizeFormat() : "Unknown" );
 		}
 
 		metaLayout.AddStretchCell();
