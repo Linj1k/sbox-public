@@ -877,4 +877,20 @@ public static partial class Networking
 
 		return await TryConnect( address );
 	}
+
+	/// <summary>
+	/// Are we currently matchmaking?
+	/// We want to suppress user-facing join errors in this case, and silently keep trying lobbies until we find one that works.
+	/// </summary>
+	internal static bool IsMatchmaking { get; private set; }
+
+	internal static IDisposable MatchmakingScope()
+	{
+		IsMatchmaking = true;
+
+		return new DisposeAction( () =>
+		{
+			IsMatchmaking = false;
+		} );
+	}
 }

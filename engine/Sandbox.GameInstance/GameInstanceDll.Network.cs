@@ -157,6 +157,12 @@ internal partial class GameInstanceDll
 
 	void FinishLoadingCodeArchives()
 	{
+		if ( !compileGroup.NeedsBuild )
+		{
+			FinishLoadingAssemblies();
+			return;
+		}
+
 		// We need to build it syncronously because we don't want other
 		// network shit coming in, that was created using the new assemblies
 		// and us not being able to understand because we don't have the
