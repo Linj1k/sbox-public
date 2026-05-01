@@ -54,6 +54,19 @@ public partial class PackagePopup : PopupWidget
 
 			l.AddStretchCell();
 
+			var local = AssetSystem.GetInstalledRevision( Package.FullIdent );
+			if ( local is not null )
+			{
+				// search referenced assets in the project
+				var referencedAssets = AssetSystem.All
+					.Where( a => a?.Package != null && a.Package.FullIdent == Package.FullIdent )
+					.ToList();
+				if ( referencedAssets.Count > 0 )
+				{
+					l.Add( new Button.Clear( $"{referencedAssets.Count} Referenced Assets", "link" ) { MouseClick = () => OpenReferencedAssets( referencedAssets ) } );
+				}
+			}
+
 			if ( AssetSystem.CanCloudInstall( Package ) )
 			{
 				installButton = l.Add( new Button.Clear( "", "" ) { MouseClick = () => _ = Install(), Enabled = !isInstalling } );
@@ -234,6 +247,14 @@ public partial class PackagePopup : PopupWidget
 
 		isInstalling = false;
 		Rebuild();
+	}
+
+	void OpenReferencedAssets( List<Asset> referencedAssets )
+	{
+		var widget = new ReferencedAssetsWidget( referencedAssets, null );
+		widget.Width = 800;
+		widget.Height = 500;
+		widget.Show();
 	}
 
 	protected override void OnPaint()

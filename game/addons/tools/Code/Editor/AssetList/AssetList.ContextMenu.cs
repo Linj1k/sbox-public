@@ -411,6 +411,30 @@ public partial class AssetList
 		tagAdd.Focus();
 	}
 
+	/// <summary>
+	/// Adds "Find in Scenes" option to the asset context menu
+	/// </summary>
+	[Event( "asset.contextmenu", Priority = 140 )]
+	private protected static void OnAssetContextMenu_FindInScenes( AssetContextMenu e )
+	{
+		if ( e.SelectedList.Count != 1 )
+			return;
+
+		var entry = e.SelectedList.First();
+		var asset = entry.Asset;
+
+		if ( asset is null || asset.IsDeleted )
+			return;
+
+		e.Menu.AddSeparator();
+
+		e.Menu.AddOption( "Find in Scenes", "search", () =>
+		{
+			var widget = new ReferencedAssetsWidget( asset, null, searchInScenes: true );
+			widget.Show();
+		} );
+	}
+
 	[Event( "asset.contextmenu", Priority = 150 )]
 	private protected static void OnAssetContextMenu_Tags( AssetContextMenu e )
 	{
